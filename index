@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日常健身訓練紀錄</title>
+<style>
+:root{
+  --bg:#202a33;--panel:#2b3742;--panel2:#34424e;--line:#4c5b67;
+  --text:#edf2f5;--muted:#b4c0c8;--blue:#91afc4;--blue2:#b5cad8;
+  --accent:#8faec2;--done:#8fb6a7;--danger:#d58f91;--shadow:0 12px 30px #10182055;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(145deg,#1c252d,#293641 55%,#202a33);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;line-height:1.55}
+header{padding:34px 20px 26px;background:#182129aa;border-bottom:1px solid var(--line)}
+.wrap{max-width:1050px;margin:auto;padding:0 18px}
+.eyebrow{color:var(--blue2);letter-spacing:.14em;font-size:.78rem;font-weight:700}
+h1{margin:6px 0;font-size:clamp(1.7rem,4vw,2.5rem);letter-spacing:.04em}
+header p{color:var(--muted);margin:4px 0 0}
+main{padding:24px 0 60px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin:0 0 18px;box-shadow:var(--shadow)}
+h2{font-size:1.18rem;margin:0 0 15px;display:flex;align-items:center;gap:9px}
+h2:before{content:"";width:5px;height:20px;border-radius:5px;background:var(--blue)}
+h3{font-size:1rem;margin:14px 0 8px;color:var(--blue2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+label,.hint{font-size:.9rem;color:var(--muted)}
+input,select,button{font:inherit}
+input[type=text],input[type=date],select{width:100%;background:#202b34;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px}
+input:focus,select:focus{outline:2px solid var(--blue);outline-offset:1px}
+button{border:0;border-radius:10px;padding:10px 15px;background:var(--blue);color:#17232c;font-weight:750;cursor:pointer;transition:.15s}
+button:hover{filter:brightness(1.1);transform:translateY(-1px)}
+button.secondary{background:#526574;color:var(--text)}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--blue2)}
+button.danger{background:#70484d;color:#ffe9e9}
+button.small{padding:6px 10px;font-size:.85rem}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.part-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.part-card{background:#202b34;border:1px solid var(--line);border-radius:13px;padding:13px}
+.pick{display:flex;align-items:flex-start;gap:9px;padding:7px 2px;color:var(--text);font-size:.92rem}
+.pick input{margin-top:5px;accent-color:var(--blue)}
+.pick small{display:block;color:var(--muted)}
+.item{display:flex;align-items:center;gap:12px;background:#202b34;border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+.item.dragging{opacity:.4;border-style:dashed}
+.item .grip{color:var(--blue2);cursor:grab;font-size:1.2rem;user-select:none}
+.item .main{flex:1;min-width:0}
+.item strong{display:block}
+.item small{color:var(--muted)}
+.item.completed{border-color:#668b7d;background:#263a36}
+.item.completed strong{text-decoration:line-through;color:#a8c6ba}
+.item input[type=checkbox]{width:19px;height:19px;accent-color:var(--done)}
+.item .item-buttons{display:flex;gap:6px;flex-wrap:wrap}
+.empty{color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:10px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:#202b34;border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:1.65rem;color:var(--blue2)}
+.stat span{color:var(--muted);font-size:.88rem}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:12px}
+.day{background:#202b34;border-radius:9px;text-align:center;padding:8px 2px;color:var(--muted);font-size:.8rem}
+.day.active{background:#526d7e;color:white;border:1px solid var(--blue2)}
+.day i{display:block;font-style:normal;font-size:1.1rem}
+.template,.history-row,.db-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.template:last-child,.history-row:last-child,.db-row:last-child{border-bottom:0}
+.template small,.history-row small,.db-row small{display:block;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:10px 0 30px}
+.notice{background:#3a4b57;border-left:3px solid var(--blue);padding:10px 12px;border-radius:8px;color:var(--blue2);font-size:.88rem;margin:10px 0}
+.hidden{display:none!important}
+@media(max-width:600px){section{padding:15px}.item{align-items:flex-start;flex-wrap:wrap}.item .main{min-width:65%}.item .item-buttons{width:100%;padding-left:30px}.week{gap:4px}.day{font-size:.7rem}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="eyebrow">WORKOUT JOURNAL</div>
+  <h1>日常健身訓練紀錄</h1>
+  <p>安排今天的訓練，留下每一天的小小進步。</p>
+</div></header>
+<main class="wrap">
+<section>
+  <h2>01．安排今日訓練</h2>
+  <div class="grid">
+    <div class="field"><label for="environment">訓練環境</label>
+      <select id="environment"><option value="居家">居家</option><option value="健身房">健身房</option></select>
+    </div>
+    <div class="field"><label for="todayDate">訓練日期</label><input id="todayDate" type="date"></div>
+  </div>
+  <div class="notice">先選擇訓練環境，再從四個部位挑選動作。每個部位最多選 2 個；每個動作預設 4 組。</div>
+  <div id="picker" class="part-grid"></div>
+  <div class="actions"><button id="addSelected">加入今日清單</button><button class="ghost" id="clearPicks">清除勾選</button></div>
+</section>
+
+<section>
+  <h2>02．今日訓練清單</h2>
+  <div class="hint">拖曳左側 ⠿ 可調整順序；勾選完成後會自動保存。</div>
+  <div id="todayList"></div>
+  <div class="actions"><button id="saveTemplate">儲存為模板</button><button class="secondary" id="resetToday">清空今日清單</button></div>
+</section>
+
+<section>
+  <h2>03．我的訓練模板</h2>
+  <div id="templates"></div>
+</section>
+
+<section>
+  <h2>04．歷史紀錄</h2>
+  <div class="grid">
+    <div class="field"><label for="historyDate">選擇日期查看</label><input id="historyDate" type="date"></div>
+  </div>
+  <div id="historyContent" style="margin-top:12px"></div>
+</section>
+
+<section>
+  <h2>05．訓練統計</h2>
+  <div class="stats">
+    <div class="stat"><b id="weekCount">0 / 7</b><span>本週訓練天數</span></div>
+    <div class="stat"><b id="totalDone">0</b><span>本週完成動作</span></div>
+  </div>
+  <div class="week" id="weekDays"></div>
+  <h3>各部位訓練次數（全部歷史紀錄）</h3>
+  <div class="stats" id="partStats"></div>
+</section>
+
+<section>
+  <h2>06．動作資料庫</h2>
+  <div class="notice">可新增、修改或刪除動作。刪除資料庫動作不會改寫已保存的歷史紀錄。</div>
+  <div class="actions"><button id="newExercise">＋ 新增動作</button></div>
+  <div id="exerciseForm" class="hidden" style="margin-top:14px">
+    <h3 id="formTitle">新增動作</h3>
+    <div class="grid">
+      <div class="field"><label for="nameZh">中文名稱</label><input id="nameZh" type="text" placeholder="例如：啞鈴側平舉"></div>
+      <div class="field"><label for="nameEn">英文名稱</label><input id="nameEn" type="text" placeholder="例如：Lateral Raise"></div>
+      <div class="field"><label for="bodyPart">身體分類</label><select id="bodyPart"><option>手</option><option>腳</option><option>背</option><option>臀</option></select></div>
+      <div class="field"><label for="target">主要訓練部位</label><input id="target" type="text" placeholder="例如：三角肌"></div>
+      <div class="field"><label for="equipment">器材</label><input id="equipment" type="text" placeholder="例如：啞鈴"></div>
+      <div class="field"><label for="envs">適用環境</label><select id="envs"><option value="both">居家、健身房</option><option value="居家">居家</option><option value="健身房">健身房</option></select></div>
+    </div>
+    <div class="actions"><button id="saveExercise">保存動作</button><button class="ghost" id="cancelExercise">取消</button></div>
+  </div>
+  <div id="exerciseDatabase" style="margin-top:12px"></div>
+</section>
+<footer>資料保存在目前瀏覽器的本機儲存空間；清除瀏覽器網站資料可能會一併刪除紀錄。</footer>
+</main>
+<script>
+"use strict";
+// ===== 集中設定：可依喜好調整 =====
+const DEFAULT_SETS = 4;
+const PARTS = ["手","腳","背","臀"];
+const WEEK_NAMES = ["日","一","二","三","四","五","六"];
+const STORAGE_KEY = "workoutJournal_v1";
+
+// 內建動作資料；環境為「both」代表居家與健身房皆可
+const SEED_EXERCISES = [
+ {id:"e1",zh:"二頭彎舉",en:"Biceps Curl",part:"手",target:"二頭肌",equipment:"啞鈴",env:"both"},
+ {id:"e2",zh:"槌式彎舉",en:"Hammer Curl",part:"手",target:"二頭肌、肱肌",equipment:"啞鈴",env:"both"},
+ {id:"e3",zh:"三頭下壓",en:"Triceps Pushdown",part:"手",target:"三頭肌",equipment:"滑輪機",env:"健身房"},
+ {id:"e4",zh:"腕彎舉",en:"Wrist Curl",part:"手",target:"前臂",equipment:"啞鈴",env:"both"},
+ {id:"e5",zh:"槓鈴深蹲",en:"Barbell Squat",part:"腳",target:"股四頭肌",equipment:"槓鈴",env:"健身房"},
+ {id:"e6",zh:"腿推",en:"Leg Press",part:"腳",target:"股四頭肌",equipment:"腿推機",env:"健身房"},
+ {id:"e7",zh:"弓箭步",en:"Lunge",part:"腳",target:"股四頭肌、臀肌",equipment:"徒手／啞鈴",env:"both"},
+ {id:"e8",zh:"腿屈伸",en:"Leg Extension",part:"腳",target:"股四頭肌",equipment:"腿屈伸機",env:"健身房"},
+ {id:"e9",zh:"高位下拉",en:"Lat Pulldown",part:"背",target:"背闊肌",equipment:"滑輪機",env:"健身房"},
+ {id:"e10",zh:"坐姿划船",en:"Seated Row",part:"背",target:"背部中段",equipment:"划船機",env:"健身房"},
+ {id:"e11",zh:"單手啞鈴划船",en:"One-arm Dumbbell Row",part:"背",target:"背闊肌",equipment:"啞鈴",env:"both"},
+ {id:"e12",zh:"超人式",en:"Superman",part:"背",target:"下背部",equipment:"徒手",env:"居家"},
+ {id:"e13",zh:"臀推",en:"Hip Thrust",part:"臀",target:"臀大肌",equipment:"槓鈴／徒手",env:"both"},
+ {id:"e14",zh:"羅馬尼亞硬舉",en:"Romanian Deadlift",part:"臀",target:"臀肌、腿後側",equipment:"槓鈴／啞鈴",env:"both"},
+ {id:"e15",zh:"臀橋",en:"Glute Bridge",part:"臀",target:"臀大肌",equipment:"徒手",env:"居家"},
+ {id:"e16",zh:"髖外展",en:"Hip Abduction",part:"臀",target:"臀中肌",equipment:"髖外展機／彈力帶",env:"both"}
+];
+
+function localDate(d=new Date()){
+ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
+ return `${y}-${m}-${day}`;
+}
+function blankState(){return {exercises:SEED_EXERCISES.map(x=>({...x})),days:{},templates:[]};}
+function loadState(){
+ try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return blankState();
+  const parsed=JSON.parse(raw);return {exercises:Array.isArray(parsed.exercises)?parsed.exercises:blankState().exercises,days:parsed.days||{},templates:Array.isArray(parsed.templates)?parsed.templates:[]};
+ }catch(e){console.warn("讀取保存資料失敗，使用預設資料",e);return blankState();}
+}
+let state=loadState();
+let editingId=null,draggedId=null;
+const $=id=>document.getElementById(id);
+const todayInput=$("todayDate");
+todayInput.value=localDate();
+$("historyDate").value=localDate();
+
+function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+function currentDate(){return todayInput.value||localDate();}
+function dayRecord(date=currentDate()){
+ if(!state.days[date])state.days[date]={environment:$("environment").value,items:[]};
+ return state.days[date];
+}
+function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function exerciseById(id){return state.exercises.find(e=>e.id===id);}
+function renderPicker(){
+ const env=$("environment").value;
+ $("picker").innerHTML=PARTS.map(part=>{
+  const list=state.exercises.filter(e=>e.part===part&&(e.env==="both"||e.env===env));
+  return `<div class="part-card"><h3>${part}部</h3><div class="hint">最多選擇 2 個動作</div>`+
+   (list.length?list.map(e=>`<label class="pick"><input type="checkbox" class="exercise-pick" data-id="${safe(e.id)}" data-part="${part}"><span>${safe(e.zh)} <small>${safe(e.en)}｜${safe(e.equipment)}</small></span></label>`).join(""):`<div class="hint">目前沒有符合環境的動作</div>`)+`</div>`;
+ }).join("");
+ $("picker").querySelectorAll(".exercise-pick").forEach(cb=>cb.addEventListener("change",()=>{
+  const same=[...$("picker").querySelectorAll(`.exercise-pick[data-part="${cb.dataset.part}"]:checked`)];
+  if(same.length>2){cb.checked=false;alert(`${cb.dataset.part}部最多只能選擇 2 個動作。`);}
+ }));
+}
+function renderToday(){
+ const rec=dayRecord();
+ $("environment").value=rec.environment||"居家";
+ const list=$("todayList");
+ if(!rec.items.length){list.innerHTML='<div class="empty">今天還沒有安排動作，從上方選擇後加入吧！</div>';return;}
+ list.innerHTML=rec.items.map((it,i)=>{
+  const e=exerciseById(it.exerciseId)||it.snapshot||{};
+  return `<div class="item ${it.done?"completed":""}" draggable="true" data-id="${safe(it.id)}">
+   <span class="grip" title="拖曳排序">⠿</span>
+   <input type="checkbox" class="done-check" data-id="${safe(it.id)}" ${it.done?"checked":""} aria-label="完成">
+   <div class="main"><strong>${i+1}. ${safe(e.zh||"已刪除的動作")} <span class="hint">${safe(e.en||"")}</span></strong><small>${safe(e.part||"")}部｜${safe(e.target||"")}｜${safe(e.equipment||"")}｜${it.sets||DEFAULT_SETS} 組</small></div>
+   <div class="item-buttons"><button class="ghost small remove-item" data-id="${safe(it.id)}">移除</button></div>
+  </div>`;
+ }).join("");
+ list.querySelectorAll(".done-check").forEach(cb=>cb.addEventListener("change",()=>{
+  const item=rec.items.find(x=>x.id===cb.dataset.id);if(item)item.done=cb.checked;persist();renderToday();renderStats();
+ }));
+ list.querySelectorAll(".remove-item").forEach(btn=>btn.addEventListener("click",()=>{
+  rec.items=rec.items.filter(x=>x.id!==btn.dataset.id);persist();renderToday();renderStats();
+ }));
+ list.querySelectorAll(".item").forEach(el=>{
+  el.addEventListener("dragstart",()=>{draggedId=el.dataset.id;el.classList.add("dragging");});
+  el.addEventListener("dragend",()=>{draggedId=null;el.classList.remove("dragging");});
+  el.addEventListener("dragover",ev=>ev.preventDefault());
+  el.addEventListener("drop",ev=>{
+   ev.preventDefault();const targetId=el.dataset.id;if(!draggedId||draggedId===targetId)return;
+   const from=rec.items.findIndex(x=>x.id===draggedId),to=rec.items.findIndex(x=>x.id===targetId);
+   const [moved]=rec.items.splice(from,1);rec.items.splice(to,0,moved);persist();renderToday();
+  });
+ });
+}
+function addSelected(){
+ const checked=[...document.querySelectorAll(".exercise-pick:checked")];
+ if(!checked.length){alert("請先選擇至少一個動作。");return;}
+ const rec=dayRecord(),existing=new Set(rec.items.map(x=>x.exerciseId));
+ const counts=Object.fromEntries(PARTS.map(p=>[p,rec.items.filter(it=>(exerciseById(it.exerciseId)||it.snapshot||{}).part===p).length]));
+ for(const cb of checked){const e=exerciseById(cb.dataset.id);if(!e||existing.has(e.id))continue;
+  if(counts[e.part]>=2){alert(`${e.part}部今天已經有 2 個動作，無法再加入。`);continue;}
+  rec.items.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),exerciseId:e.id,sets:DEFAULT_SETS,done:false,snapshot:{...e}});
+  existing.add(e.id);counts[e.part]++;
+ }
+ persist();renderToday();renderStats();renderPicker();
+}
+function renderTemplates(){
+ $("templates").innerHTML=state.templates.length?state.templates.map(t=>`<div class="template"><div><strong>${safe(t.name)}</strong><small>${t.items.length} 個動作：${t.items.map(x=>safe(x.snapshot?.zh||exerciseById(x.exerciseId)?.zh||"動作")).join("、")}</small></div><div class="actions"><button class="small apply-template" data-id="${safe(t.id)}">套用</button><button class="danger small delete-template" data-id="${safe(t.id)}">刪除</button></div></div>`).join(""):'<div class="empty">尚未儲存模板。安排好今日清單後，可以儲存成模板。</div>';
+ document.querySelectorAll(".apply-template").forEach(b=>b.addEventListener("click",()=>{
+  const t=state.templates.find(x=>x.id===b.dataset.id);if(!t)return;
+  if(!confirm(`將「${t.name}」套用到 ${currentDate()}？這會取代當天目前的清單。`))return;
+  const rec=dayRecord();rec.environment=t.environment||$("environment").value;
+  rec.items=t.items.map(x=>({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random()),exerciseId:x.exerciseId,sets:x.sets||DEFAULT_SETS,done:false,snapshot:{...x.snapshot}}));
+  $("environment").value=rec.environment;persist();renderPicker();renderToday();renderStats();
+ }));
+ document.querySelectorAll(".delete-template").forEach(b=>b.addEventListener("click",()=>{
+  if(confirm("確定刪除這份模板？")){state.templates=state.templates.filter(x=>x.id!==b.dataset.id);persist();renderTemplates();}
+ }));
+}
+function saveTemplate(){
+ const rec=dayRecord();if(!rec.items.length){alert("今日清單沒有動作，無法儲存模板。");return;}
+ const name=prompt("請輸入模板名稱，例如：腿臀日");if(!name||!name.trim())return;
+ state.templates.push({id:String(Date.now()),name:name.trim(),environment:rec.environment,items:rec.items.map(it=>({...it,done:false,snapshot:{...(exerciseById(it.exerciseId)||it.snapshot)}}))});
+ persist();renderTemplates();alert("模板已儲存！");
+}
+function renderHistory(){
+ const date=$("historyDate").value||localDate(),rec=state.days[date];
+ if(!rec||!rec.items?.length){$("historyContent").innerHTML='<div class="empty">這一天沒有訓練紀錄。</div>';return;}
+ $("historyContent").innerHTML=`<div class="hint">${safe(date)}｜${safe(rec.environment||"")}｜${rec.items.filter(x=>x.done).length}/${rec.items.length} 個動作完成</div>`+
+ rec.items.map((it,i)=>{const e=exerciseById(it.exerciseId)||it.snapshot||{};return `<div class="history-row"><div><strong>${i+1}. ${safe(e.zh||"已刪除的動作")}</strong><small>${safe(e.en||"")}｜${it.sets||DEFAULT_SETS} 組</small></div><span>${it.done?"✓ 已完成":"未完成"}</span></div>`;}).join("");
+}
+function startOfWeek(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+function renderStats(){
+ const now=new Date(),start=startOfWeek(now),days=[];
+ let active=0,done=0;
+ for(let i=0;i<7;i++){const d=new Date(start);d.setDate(start.getDate()+i);const key=localDate(d),rec=state.days[key],has=!!(rec&&rec.items&&rec.items.length);
+  if(has)active++;if(rec)done+=rec.items.filter(x=>x.done).length;
+  days.push(`<div class="day ${has?"active":""}">${WEEK_NAMES[d.getDay()]}<i>${d.getDate()}</i>${has?"●":"—"}</div>`);
+ }
+ $("weekCount").textContent=`${active} / 7`;$("totalDone").textContent=done;$("weekDays").innerHTML=days.join("");
+ const counts=Object.fromEntries(PARTS.map(p=>[p,0]));
+ Object.values(state.days).forEach(rec=>(rec.items||[]).forEach(it=>{const e=exerciseById(it.exerciseId)||it.snapshot||{};if(counts[e.part]!==undefined)counts[e.part]++;}));
+ $("partStats").innerHTML=PARTS.map(p=>`<div class="stat"><b>${counts[p]}</b><span>${p}部動作次數</span></div>`).join("");
+}
+function renderDatabase(){
+ $("exerciseDatabase").innerHTML=state.exercises.length?state.exercises.map(e=>`<div class="db-row"><div><strong>${safe(e.zh)} <span class="hint">${safe(e.en)}</span></strong><small>${safe(e.part)}部｜${safe(e.target)}｜${safe(e.equipment)}｜${safe(e.env==="both"?"居家、健身房":e.env)}</small></div><div class="actions"><button class="ghost small edit-exercise" data-id="${safe(e.id)}">修改</button><button class="danger small delete-exercise" data-id="${safe(e.id)}">刪除</button></div></div>`).join(""):'<div class="empty">動作資料庫目前是空的。</div>';
+ document.querySelectorAll(".edit-exercise").forEach(b=>b.addEventListener("click",()=>openExerciseForm(b.dataset.id)));
+ document.querySelectorAll(".delete-exercise").forEach(b=>b.addEventListener("click",()=>{
+  const e=exerciseById(b.dataset.id);if(!e)return;
+  if(confirm(`確定刪除「${e.zh}」？既有歷史紀錄會保留。`)){state.exercises=state.exercises.filter(x=>x.id!==e.id);persist();renderAll();}
+ }));
+}
+function openExerciseForm(id=null){
+ editingId=id;const e=id?exerciseById(id):null;
+ $("formTitle").textContent=e?"修改動作":"新增動作";
+ $("nameZh").value=e?.zh||"";$("nameEn").value=e?.en||"";$("bodyPart").value=e?.part||"手";
+ $("target").value=e?.target||"";$("equipment").value=e?.equipment||"";$("envs").value=e?.env||"both";
+ $("exerciseForm").classList.remove("hidden");$("nameZh").focus();
+}
+function closeExerciseForm(){$("exerciseForm").classList.add("hidden");editingId=null;}
+function saveExercise(){
+ const zh=$("nameZh").value.trim(),en=$("nameEn").value.trim(),target=$("target").value.trim(),equipment=$("equipment").value.trim();
+ if(!zh||!en||!target||!equipment){alert("請填寫中英文名稱、主要訓練部位與器材。");return;}
+ const data={zh,en,part:$("bodyPart").value,target,equipment,env:$("envs").value};
+ if(editingId)Object.assign(exerciseById(editingId),data);else state.exercises.push({id:"custom-"+Date.now(),...data});
+ persist();closeExerciseForm();renderAll();
+}
+function renderAll(){renderPicker();renderToday();renderTemplates();renderHistory();renderStats();renderDatabase();}
+$("environment").addEventListener("change",()=>{dayRecord().environment=$("environment").value;persist();renderPicker();});
+todayInput.addEventListener("change",()=>{renderToday();renderPicker();renderStats();});
+$("addSelected").addEventListener("click",addSelected);
+$("clearPicks").addEventListener("click",()=>document.querySelectorAll(".exercise-pick").forEach(x=>x.checked=false));
+$("saveTemplate").addEventListener("click",saveTemplate);
+$("resetToday").addEventListener("click",()=>{if(confirm("確定清空今天的訓練清單？此操作會更新當天紀錄。")){dayRecord().items=[];persist();renderToday();renderStats();}});
+$("historyDate").addEventListener("change",renderHistory);
+$("newExercise").addEventListener("click",()=>openExerciseForm());
+$("saveExercise").addEventListener("click",saveExercise);
+$("cancelExercise").addEventListener("click",closeExerciseForm);
+renderAll();
+</script>
+</body>
+</html>
